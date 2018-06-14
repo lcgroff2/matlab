@@ -1,0 +1,175 @@
+
+blintstnotes.txt
+
+OK, first a quick test run.
+
+settings from blinktst.m:
+
+---
+dt = 1e-3;
+
+tmax=120; % number of seconds for experiment
+
+tau_on = 0.030; % lifetime of "on" state
+
+tau_off = 0.030; % lifetime of "off" state
+
+emrate=200000; % number of photons per second, when in the "on" state
+
+QE = 0.99; % quenching efficiency ( around 1.0 for single dye )
+
+
+% camera settings and properties
+offset=100;
+readnoise=3;
+gain=0.3; % gain of 0.3 means roughly 3 photons per ADC count
+
+% simulation parameters (affect how things are calculated, but do not correspond to physical picture)
+oversamp=10; % basically, uses a much smaller dt when calculating the trajectory, then samples back down to dt
+---
+
+So, basically, this is for a "strong" blinker, such as a single dye, with a QE of 0.99. I set the emrate very high so we can easily see blinking, but an actual dye would probably have a much lower emission rate.
+
+Now let's run it and do some analysis
+
+>> blinktst
+
+Now let's plot the simulated trajectory
+
+>> plot(simcmos)
+
+Let's zoom in to see the blinking
+
+>> plot(simcmos(1:1000))
+
+OK, it definitely shows blinking quite clearly.
+
+Now let's store the "raw" autocorrelation C(tau) in variable "acc"
+
+>> acc=autocorr(simcmos);
+
+Notice that it's somewhat slow for this many data points(~8 sec on my mac), because it uses nested "for" loops for the calculation. Let's try "acft", which should be faster.
+
+>> facc=acft(simcmos);
+
+Now let's plot them together to compare and make sure acft gives proper results:
+
+>> ran=1:200;
+>> plot(t(ran),acc(ran),t(ran),facc(ran),'o')
+
+They look the same. Also, comparing individual data points, they are the same, to within double precision floating point error. Also, you can see that the first point in the autocorrelation is the same as sum(I.*I), as expected for C(t) (I think--please double-check).
+
+Not to beat a dead horse, but let's check xcorr.m from matlab.
+
+>> xcc=xcorr(simcmos);
+>> plot(xcc(1:200))
+
+Hmm. That just looks wrong. Maybe I didn't use the command correctly.
+
+Now let's try the normalized autocorrelation.
+
+>> nacc=nac(simcmos);
+>> plot(nacc(1:200))
+
+The decay goes to zero-ish as expected. The first point is 0.052. I will need to check to see if that is correct.
+
+OK, let's see if the normalized autocorrelation fits an exponential. We know the autocorrelation should fit ktot=66.67.
+
+>> plot(t(ran),nacc(ran),t(ran),0.052*exp(-66.67*t(ran)))
+
+Looks about right.
+
+Next, try the other items listed in the script, pasted below. I'll leave them for the students:
+% -whether it makes a difference if FT is a power of two or not.
+% -whether quenching efficiency of "polaron" affects C(tau)/autocorr/acft/acvec unnormalized correlation, or xcorr or nac G(tau) normalized correlation
+% -effect of offset, readout noise, poisson noise, and ADC gain on C(tau) or G(tau)
+% -whether C(1) is the sum of all data squared, for CMOS data (we know this is true for APD data)
+% -what is the minimum signal level and number of frames to get meaningful autocorrelation results
+% -try to use 2d autocorrelation or other approach to separate the two rate constants
+% -check the effects of weak blinking (set QE=0.05 or similar) on autocorrelation, etc.
+% -check to see if quenching efficiency can be extracted from the autocorrelation using approach in nano lett paper.
+% -test photon counting histogram approach for finding equilibrium constant (and separate out rates)
+% -test whether Barbara approach to finding equilibrium constant will work for CMOS data
+% -test histogram of "on" times and "off" times
+% -add photobleaching to script
+% -does "acvec" work properly? How is performance compared to acft?
+% -does "nac" actually perform the normalization properly?
+
+
+JDM - now testing some parts of the above list.
+
+1. How does quenching efficiency affect ac/nac? etc?
+
+for QE=0.99, ac(1)=2.13e9 ac(200) = 2.02e9 nac(1) = 0.05
+ for QE=0.5, ac(1) = 2.5273e+09, ac(200) = 2.4982e+09, nac(1) =0.0116
+
+Going to QE=0.5 gives a drop by a factor of almost 4 in nac(1)
+QE of 0.2 gives nac(1)=0.00257
+QE of 0.1 gives nac(1)=0.00143
+
+note: these calculations were for offset=100, which makes the results unclear.
+
+conclusion: QE does affect nac(1), but the relationship does not seem simple. Also, our previous assmption about the relationship between QE and autocorrelation seems wrong in the details, but there is a relationship. Furthermore, we should use offset=0 in the simulation, and also make our best effort to accurately subtract offset when analyzing experimental results (I think our scripts already do that pretty well, but it's good to check).
+
+1. Does it help clarify things to subtract offset?
+A: yes. Also, since we usually do an subtraction subtraction when dealing with real data, it is probably best to set the offset to zero in the simulation, since that is closer to experiment. Furthermore, we should always check to make sure we accurately subtract offset when analyzing experimental results (I think our scripts already do that pretty well, but it's good to check).
+
+2. Q: If we know kon, koff, what is the minimum duration of the experiment? 
+A: if we assume we need ~20 events to get a rate constant, then the number of events over an interval is dictated by the lowest rate. If the system is usually in the "on" state (e.g., at low excitation intensities), then the number of events is primarily dictated by koff. Then the number of blinking events for a given duration texp is given by:
+
+Nevents ~= texp*koff = texp/tau_on (assuming koff is the rate-limiting step)
+
+or another way to handle it is that for N blink events, the total amount of time is given by,
+
+ttot = N * tau_on + N * tau_off = N * (tau_on+tau_off)
+
+therefore
+
+N = texp / (tau_on+tau_off)
+
+Thus we need to set the duration of the experiment "texp" so that N>20.
+
+* The above expressions could be VERY USEFUL for properly designing experiments and should be added to your notebook of useful equations.
+
+3. Keq question: With the offset set to zero (ideal case of offset subtraction), we can see that nacc(2) is similar to one over the equilibrium constant. We probably need to extrapolate to zero time, particularly if the time constant is only a few dt.
+
+4. My guess at the relationship between extrapolated nacc(0) and the data is:
+
+nacc(0) = 1/Keq * QE^n
+
+Let's test it. First for Keq = 1 (tau_on = tau_off). QE=1: nacc(0) ~=1 (slightly over)
+QE=0.9: nacc(0) = 0.67
+QE=0.8: nacc(0) ~= 0.427
+QE=0.6: nacc(0) ~= 0.18
+QE=0.4: nacc(0) ~= 0.062
+QE=0.2: 0.012
+QE=0.1: .0028
+QE=0.05: 0.00067
+
+It looks like n ~= 3, but the fit isn't exact, and it's not clear that it works for Keq not unity. If someone wants to dig a little deeper or more carefully (longer runs, higher emission rate--I used something like 2e7 photons/sec), that would be helpful. It may even be possible to derive an exact equation.
+
+NOTE: this probably means that part of the nano lett paper with the assumption of a linear relationship between QE of a polaron and the amplitude of the autocorrelation is wrong.
+
+NOTE: the nano lett paper used another method too--picking out blinking events "by hand", so this error in the paper is not serious. We knew at the time that we were not sure about the equation/relationship, but I didn't think of alternative equations and how to test at the time. Basically, we noticed that the autocorrelation amplitude seemed to fit with what we were observing from the raw kinetics trace, and noted this correlation. As it turns out, the correlation was somewhat wrong (i.e., only right for a narrow set of conditions). There is no need to panic--this is the way we make progress.
+
+5. What does the power spectrum look like? A: very noisy. I speculate that if you average enough to get the noise down, it should look like a Lorentzian, since the autocorr gives an exponential, and the fourier transform of an exponential is a lorentzian. I was hoping that there might be important information in the power spectrum about the dynamics, but probably not.
+
+6. What about corr(I^2,I)? Does that give us additional rate constant info? One strategy to test this is to make a series of kon, koff pairs, that give us the same ktot (thus the same autocorrelation time constant), and then look at the higher-order correlation, to see if it is no longer exponential, and if it varies in a systematic way.
+
+using a simple script, the following sets of parameters give the same ktot:
+  kon    koff    tau_on    tau_off
+ 1.00000  19.00000  0.05263  1.00000
+ 2.00000  18.00000  0.05556  0.50000
+ 5.00000  15.00000  0.06667  0.20000
+ 10.00000  10.00000  0.10000  0.10000
+
+A: no, the fit to corr(I^2,I) gives the same time constant. Also, acft(dI.^2) gives same time constant.
+
+7. What about 3D autocorrelation G(tau1,tau2)?
+approaches:
+-try the above parameters, and see if 3D corr "looks" different for different tau_on, tau_off that give the same ktot.
+-try subtracting the mean from the intensity first
+-note: use very high SNR, and shorter run time, and small maxlag parameter for 2d autocorrelation calculation
+-should probably try to write an FFT version of 2D autocorrelation
+
+A: there might be some information in G(0,0) (extrapolated), but overall, my impression is that the higher-order autocorrelation doesn't give reliable additional information for this system. I also tried myxcorr(I^2,I) and acft(dI.^2), where dI is I-mean(I). None of these gave additional time constant information (again, extrapolated G(0) might mean something, but it's not immediately clear). I'm going to look into other approaches to analyzing "time series" data, that might more directly give information about on and off times. Of course, we can also do modulation experiments.

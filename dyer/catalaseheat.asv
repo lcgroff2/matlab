@@ -1,0 +1,31 @@
+% Calculate Catalase heme B heating after disproportionation of H2O2 
+% assuming that all of the heat is transfered into the product molecule:
+
+T1 = 298;  %(K) - Assume room temp to start.
+
+delta_H = 100; %(kJ/mol) - Estimated total heat released during catalytic 
+               %turnover from Bustamante, et. al.
+
+Cp_ZnTPP = 1.7/1000; %(kJ g-1 K-1) - per gram heat capacity of ZnTPP
+MW_ZnTPP = 678.11;   %(g/mol) - molecular weight of ZnTPP
+Cpmol_ZnTPP = Cp_ZnTPP*MW_ZnTPP; %(kJ mol-1 K-1) - molar heat capacity of 
+                                 %ZnTPP
+
+dTZn = delta_H/Cpmol_ZnTPP; %(K) - dH = CpdT rearranged to isolate dT, using 
+                     %remaining heat to calculate temperature change of 
+                     %water vapor.
+T_final = T1+dTZn; %(K) - Add up temperature changes from total heat 
+                      %transfer.
+
+                      
+Cprel_hemin = 0.001; %(J/°C) from J. Therm. Anal. Chem. in 0.5 mL of 
+                     %0.06 mg/mL hemin in DMF at 298 K.
+
+gL = 0.06; %(g/L) convert to g/L hemin.
+mwhemin = 651.94; %(g/mol) - molecular weight of hemin.
+M_hemin = gL/mwhemin; %(mol/L) - Molar concentration of hemin in DMF.
+molhemin = M_hemin*5e-4; %(mol) - multiply by 0.5 mL/1000 = 5e-4 L.
+Cpmol_hemin = Cprel_hemin/molhemin; %(J mol-1 K-1) - divide relative Cp by 
+                                    %moles to get molar Cp of hemin.
+
+dThemin = delta_H/Cpmol_hemin; %(K) - temperature change using hemin data.             

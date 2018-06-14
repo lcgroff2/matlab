@@ -1,0 +1,71 @@
+
+% function for finding FWHM of IRF for pico data
+
+% some adjustable parameters
+
+rep_rate=76.082e6;
+
+period=1/rep_rate*1e9;
+
+bins_per_ns = 150;
+
+numpts=200; % number of points to include in centroid calc.
+
+ls *.asc
+
+% [fnam,fpath]=uigetfile('*.asc','MCA Data');
+
+fnam=input('enter file name ','s');
+
+fid=fopen(fnam,'r');
+
+y=fscanf(fid,'%f',[1,inf]);
+
+fclose(fid);
+
+x=1:length(y);
+
+plot(x,y)
+
+disp('click on a peak to measure FWHM');
+
+plot(x,y)
+
+[xin,yin]=ginput(1);
+
+tmpmax=round(xin);
+
+% first run at calculating centroid
+
+ran=(tmpmax-numpts):(tmpmax+numpts);
+
+N=sum(y(ran));
+delta=sum(y(ran).*(ran-tmpmax))./N;
+
+centroid1=tmpmax+delta;
+
+% second run
+
+tmpmax=round(centroid1);
+
+ran=(tmpmax-numpts):(tmpmax+numpts);
+
+N=sum(y(ran));
+delta=sum(y(ran).*(ran-centroid1))./N;
+
+centroid2=centroid1+delta;
+
+% find variance
+
+var1=sum(y(ran).*(ran-centroid1).^2)./N;
+
+sig1=sqrt(var1);
+
+fwhm=sig1*2.355;
+
+fwhm_ns=fwhm/bins_per_ns;
+
+fprintf(1,'The center is at bin number %i\n',round(centroid2));
+
+fprintf(1,'The FWHM is %6.2f nanosec.\n',fwhm_ns);
+

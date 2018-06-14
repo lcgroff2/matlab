@@ -1,0 +1,13 @@
+%trircorrect.m Baseline correction script
+Abase = zeros(size(A(:,1)));
+for i = 1:5;
+    Abase = Abase+A(:,end-(i-1));
+end
+for i = 1:length(t);
+    p = polyfit(cm1,A(:,i),2);
+    Acorr(:,i) = A(:,i)-(p(1)*cm1.^2+p(2)*cm1+p(3));
+    Acorr2(:,i) = A(:,i)-Abase;
+    p2 = polyfit(cm1,Acorr2(:,i),2);
+    Acorr3(:,i) = 
+    
+end

@@ -1,0 +1,140 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx,cite}
+\usepackage{times}
+\usepackage[letterpaper]{geometry}
+\usepackage{amsmath}
+%\usepackage{doublespace}
+\geometry{text={6.75in,9in}, top=0.6in,
+left=0.75in}
+
+\newcommand{\rang}      {\AA^{-1}}      %reciprocal angstroms
+
+
+\def\bra#1{\langle#1\vert}              % \bra{stuff} gives <stuff|
+\def\ket#1{\vert#1\/\rangle}            % \ket{stuff} gives |stuff>
+\def\vev#1{\langle{#1}\rangle}          % \vev{stuff} gives <stuff>
+\def\Ham{{\mathcal H}}
+\def\D{{\partial}}
+\def\DD#1#2{\frac{\partial#1}{\partial#2}}
+\def\EE#1{\times 10^{#1}}
+
+
+\title{Fitting Stretched Exponentials}
+\date{April 4, 2008}
+
+\begin{document}
+\maketitle
+
+The stretched exponential or Kohlrausch-Watts-Williams (function)
+often describes dynamics in heterogeneous systems characterized by a
+range of rates.  It is of the form,
+%
+$$
+I = I_0 e^{-(t/\tau)^\beta}
+$$
+%
+The $\beta$ parameter is the ``stretch'' parameter, and it varies
+between 0 and 1.  A $\beta$ parameter of 1 is just an ordinary
+exponential decay.  So, the lower the $\beta$ parameter is, the more
+heterogeneous the dynamics.  Therefore $\beta$ obtained from fits can
+act as a quantitative measure of heterogeneity.  We will attempt to
+extract $\beta$ values from our simulations and fits to determine how
+the heterogeneity in the fluorescence dynamics depends on various
+parameters such as particle size, exciton diffusion length, F\" orster
+radius, and number of dyes.  Let's play with the math and see if we
+can come up with a way to do a straight-line fit that will give us
+$\beta$ as the slope.  If we divide both sides by $I_0$, and take the
+natural log of both sides, we get,
+%
+$$
+\ln \left( \frac{I}{I_0} \right) = - \left( \frac{t}{\tau}
+\right)^\beta
+$$
+%
+This function is of the form,
+%
+$$
+y = a x^b
+$$
+%
+If we perform a log-log plot of $y$ versus $x$, we obtain a straight
+line with a slope of $b$.  If you want a little more detail and
+example plots, see ``log log plot'' on Wikipedia.  The $y$ value at
+$x=1$ gives us the $a$ parameter.
+
+Mapping this onto the KWW form, a plot of $\ln (- \ln I/I_0)$ versus
+$\ln t$ should yield a straight line of slope $\beta$.  The intercept
+should tell us something about $\tau$.
+
+Let's try this out on some simulated KWW-type data in {\sc matlab}.
+First we set up our time axis, $\tau$, and $\beta$:
+%
+\begin{verbatim}
+>> t = 0:200;
+>> tau = 30;
+>> beta = 0.76;
+\end{verbatim}
+%
+Now we make some simulated fluorescence data,
+%
+\begin{verbatim}
+>> f=exp(-(t/tau).^beta);
+\end{verbatim}
+%
+Notice we used \verb=.^= since we are raising an array to a power.
+Now let's do a log-log plot to see if it looks like a straight line,
+%
+\begin{verbatim}
+>> loglog(t,-log(f/f(1)))
+\end{verbatim}
+%
+Yes, it looks like a straight line.  Recall that in {\sc matlab} {\tt
+log} means natural (base $e$) log, while {\tt log10} is the base 10
+logarithm.  Now we have to do a linear fit in
+order to extract the $\beta$ parameter.  This is done as follows.
+First we need to take the log-log of the fluorescence intensity and
+the log of the time axis.  We will place the results in {\tt loglogf}
+and {\tt logt}.
+%
+\begin{verbatim}
+>> loglogf=log(-log(f/f(1)));
+>> logt = log(t);
+\end{verbatim}
+%
+Now we fit to a straight line,
+%
+\begin{verbatim}
+>> pp=polyfit(logt,loglogf,1)
+
+
+\end{verbatim}
+% 
+This yielded a bad fit, because the first point of {\tt loglogf} is
+either {\tt NaN} or {\tt -Inf}.  Since the first point is {\tt
+f(1)/f(1)} which is 1, the log of that is zero.  Then we take the log
+of zero, and get minus infinity.  We need to remove the first point and
+fit the rest:
+%
+\begin{verbatim}
+>> loglogf=loglogf(2:end);
+>> logt=logt(2:end);
+>> pp=polyfit(logt,loglogf,1)
+pp =
+
+   0.76000  -2.58491
+
+\end{verbatim}
+%
+That fixed it!  The first parameter, which is the slope, is 0.76, which is the
+$\beta$ parameter we started with.  The intercept is somehow related
+to $\tau$, but we won't worry about that for now.  We might want to
+check the fit by plotting:
+\begin{verbatim}
+>> plot(logt,loglogf,'o',logt,polyval(pp,logt))
+\end{verbatim}
+%
+I have put all this together in a little m-file {\tt logloglog.m}
+which hopefully might help us to analyze our simulation results, etc.
+
+
+\end{document}

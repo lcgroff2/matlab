@@ -1,0 +1,471 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx,cite}
+\usepackage{times}
+\usepackage[letterpaper]{geometry}
+\usepackage{amsmath}
+%\usepackage{doublespace}
+\geometry{text={6.25in,8.5in}, top=1in,
+left=1in}
+
+\newcommand{\rang}      {\AA^{-1}}      %reciprocal angstroms
+
+
+\def\bra#1{\langle#1\vert}              % \bra{stuff} gives <stuff|
+\def\ket#1{\vert#1\/\rangle}            % \ket{stuff} gives |stuff>
+\def\vev#1{\langle{#1}\rangle}          % \vev{stuff} gives <stuff>
+\def\Ham{{\mathcal H}}
+\def\D{{\partial}}
+\def\DD#1#2{\frac{\partial#1}{\partial#2}}
+\def\EE#1{\times 10^{#1}}
+
+
+\title{Modeling Exciton Diffusion in Nanoparticles}
+\author{J. McNeill}
+\date{March 7, 2012}
+
+\begin{document}
+\maketitle
+
+
+\noindent {\Large \bf Overview} \vskip 10 pt
+
+\noindent First, let's get some terms out of the way.  By {\em
+  exciton}, here we are referring to a localized molecular excitation
+on a relatively short segment of conjugated polymer.  This type of
+molecular exciton is very different from typical (Wannier) excitons in
+inorganic semiconductors (which are considered electron-hole pairs and
+are much larger, are much more weakly bound, and are typically only
+stable at very low temperatures, 4 K or less).  Heeger (Nobel
+prize-winner) has theorized that conjugated polymers are very much
+like inorganic semiconductors, and that excitons in CP's are also
+weakly-bound electron-hole pairs. However, there is considerable
+evidence that this view is wrong, and he is in the minority on this
+subject.  The type of exciton we are referring to for conjugated
+polymers is the small or {\em molecular exciton} (sometimes called a
+Frenkel exciton, but I prefer not to, see below), which consists of a
+molecule in the $\pi$* excited state and the polarization of the
+surrounding polymer molecules.  Strong coupling between the transition
+dipoles of nearby chromophores can give rise to collective excitations
+called {\em Frenkel excitons}, which can in principle be many times
+larger than a single chromophore.  Frenkel excitons often exhibit an
+energy shift or energy splitting, referred to as the Davydov
+splitting.  However, for the sake of simplicity, here we will assume
+that the excitons are small--much smaller than the nanoparticle, and
+we will assume that Frenkel exciton behavior (such as collective
+excitation, Davydov splitting and coherent, ultrafast energy transfer)
+is either unimportant or is partially taken into account in the
+exciton diffusion theory, {\it i.e.}, ultrafast/coherent transport
+results in a somewhat larger exciton diffusion length.
+
+Another quick note about excitons.  Wikipedia, and many other places,
+define an exciton as a bound state of an electron and hole which are
+attracted to each other by a Coulomb force.  While this is correct for
+Wannier excitons, it is {\bf very wrong for molecular/Frenkel
+  excitons}, since the picture of a bound electron-hole pair typically
+doesn't make sense for molecules.  For example, if we plug in a
+typical molecular exciton binding energy of 0.5 eV and a typical
+dielectric constant of 4, this gives an orbit of less than 1 \AA, much
+smaller than the molecule. This is physically absurd, thus the
+electron-hole pair picture doesn't make sense for molecular/Frenkel
+excitons.  Additional information about Frenkel excitons and the
+Frenkel-exciton Hamiltonian, which is based on coupling of transition
+dipoles, is given in a paper by Kasha and El-Bayoumi, ``The Exciton
+Model in Molecular Spectroscopy.''
+
+By {\em chromophore}, I am referring to a small segment of the polymer
+chain, typically 3-8 polymer repeat units in length.  The exciton can
+``hop'' more or less randomly from chromophore to chromophore
+repeatedly during the lifetime of the exciton.  Because of the
+similarity of this behavior to the phenomenon of diffusion, this
+process is called {\em exciton diffusion}, and it occurs by either
+overlap of molecular orbital wavefunctions (often referred to as
+Dexter transfer), by F\" orster transfer, or by coherent ultrafast
+energy transfer.  All are known to occur, likely simultaneously, and
+it can be difficult to experimentally determine which process or
+processes are dominant. The question of which mechanism dominates
+depends on a variety of system physical parameters such as chain
+conformation, disorder, interchromophore distances, transition dipole
+moments, temperature, and the electronic states (molecular orbitals)
+involved.  We might want to design some experiments (low T
+experiments, maybe some time-resolved polarization anisotropy) to
+investigate these issues, including such basic issues as effective
+chromophore size and the length scales and time scales of individual
+hopping events, but for now, in this document, we will not worry
+further about the detailed mechanism for exciton hopping/diffusion.
+
+In the standard picture of exciton diffusion theory, at any given
+moment in time, an exciton can either hop to another site (diffuse),
+decay radiatively (emit a photon), or decay non-radiatively (there are
+many possibly non-radiative pathways, including internal conversion to
+vibrations, electron transfer to make a charge-separated state, or
+intersystem crossing to make a triplet state).  In a disordered
+material there are additional complications, because there will be a
+range of chromophore energies, and exciton hopping will tend to
+proceed from higher energy chromophores (ones with a larger
+$\pi$-$\pi$* gap) to lower energy chromophores, eventually becoming
+trapped at low-energy chromophores.  This tends to result in the
+relatively large gap between excitation and emission (as compared to
+dyes) typically seen for conjugated polymers, particularly for the
+films and nanoparticles, and other phenonomena, such as a progressive
+red-shifting of the emission on the few picosecond timescale (seen in
+fluorescence upconversion experiments) and a related slowing-down of
+the rate of the energy diffusion on the picosecond timescale, as the
+typical exciton energy decreases and the fraction of energetically
+accessible chromophores decreases--as an exciton gets redder, there
+are fewer and chromophores that are still redder and can thus accept
+the exciton. We will also ignore these phenomena in our model, for
+now, but it is worthwhile to note them.
+
+If we add an energy acceptor (dye/quencher), then occasionally an
+exciton will decay by transferring its energy to the acceptor, likely
+via a F\" orster transfer (FRET) mechanism.  Since the rate of FRET
+depends on the inverse sixth power of the distance, and the dyes and
+excitons are distributed more or less randomly, this gives rise to a
+large range of energy transfer rates.  This process has been examined
+in some detail for a number of years, dating back to early work in the
+60's and 70's by Powell (look in the EndNote database) on doped
+anthracene crystals, and more recently by theorists such as Nakanishi
+and experimentalists such as Andy Monkman.  Many details haven't been
+figured out, and it's still not clear the relative roles of exciton
+(chromophore) size, Dexter vs. Forster transfer, collective
+excitations (coherent energy transfer, Frenkel exciton picture),
+energetic disorder, etc.
+
+The conjugated polymer nanoparticles give us another window into these
+energy transfer phenomena.  By controlling the particle size, we can
+control the length scale over which energy transfer occurs.  We also
+have some control of polymer phase (e.g., the beta phase in PFO).
+Also, it is much easier to collect accurate and reproducible
+fluorescence quantum yield results and time-resolved fluorescence
+(TCSPC) on the nanoparticle dispersions than it is to collect data on
+thin films.  Most prior work in this area is on thin films.  Thin
+films tend to be difficult to reproduce, and there are interface
+effects and waveguiding effects that are hard to quantify, control and
+model.
+
+We have already seen some evidence that energy transfer efficiency
+depends on particle size.  This is exciting, and provides the
+motivation to study these effects further.  We plan on conducting a
+number of TCSPC studies to look at energy transfer for a range of
+particle sizes and doping concentrations.  By careful analysis of the
+TCSPC traces, we hope to find direct evidence of ``distributed''
+energy transfer rates (a range of rates due to the random distribution
+of dyes and range of Forster distances).  This by itself should be
+publishable in a P-Chem journal.  In addition, we could follow this up
+with time-resolved polarization anisotropy (straightforward, just add
+polarizers to the TCSPC setup), single molecule measurements, and low
+temperature measurements.  We could even later add femtosecond
+time-resolved fluorescence upconversion measurements (if you're
+interested, I could point you to some papers on how this is done).  All
+of these results should give us an unprecedented level of detail in
+determining the fundamental physics of exciton interactions and energy
+transfer in CPs and other molecular semiconductors.  This is a very
+important practical and fundamental question, very relevant to
+optimizing our nanoparticles for PDT and other applications, and even
+for other applications such as polymer displays and solar cells.
+
+We are way ahead of the competition in that we already have flexible,
+sophisticated, easy-to-use code for an exciton diffusion and energy
+transfer model that works for nanoparticles (trivial to extend to bulk
+films--just use larger nanoparticles), and we have the nanoparticle
+system and fluorescence quantum yield and lifetime data.  This should
+lead to a series of publications in physical chemistry journals and
+possibly high profile publications as we progress.
+
+\vskip 24 pt
+
+\noindent {\Large \bf 3D Random Walk Model: Monte Carlo
+  Approach} \vskip 10pt
+
+\noindent We are modeling the combined processes of exciton diffusion,
+fluorescence, non-radiative relaxation, and energy transfer using a 3D
+random walk simulation employing a Monte Carlo approach--simulating
+random exciton trajectories using a random number generator.
+Previously, in Changfeng's dye-doped nanoparticle paper and papers by
+Jiangbo, we treated the motion of the excitons as a random walk on a
+3D cubic lattice.  There were some shortcomings with that code when it
+came to simulating our recent (2012) experiments, so I started writing
+a different version, and in the process found a bug in the old code
+that is difficult to fix (and introduces some error, but not enough to
+invalidate our previous results). Therefore we are switching to the
+new code, based on a slightly different picture of diffusion and
+Brownian motion.  I have verified that this code is more accurate than
+the previous code, and it has been extensively tested.  Here is the
+approach taken for the new code.  According to Brownian motion theory,
+if we have a particle with a diffusion coefficient $D$, initially at
+position $x_0$ at time $t_0$, the particle will, at a later time $t$,
+be at a random position given by a Gaussian probability distribution,
+%
+$$
+p(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-(x-x_0)^2/2 \sigma^2},
+$$
+%
+where the standard deviation $\sigma$ is given by
+%
+$$
+\sigma = \sqrt{2 D (t-t_0)}.
+$$
+%
+It can be shown that trajectories that the above expressions reproduce
+the correct 1D Brownian motion behavior for the mean square displacement
+$\vev{x^2(t-t^\prime)}$,
+%
+$$
+\vev{x^2(t-t^\prime)} = 2 D t
+$$
+%
+Thus, in our Monte Carlo approach, if we have a time step $\Delta t$,
+we can propagate the particle (exciton) at each time step by
+generating a Gaussian-distributed random numbers with a standard deviation of
+$\sigma$.  In {\sc matlab} this is achieved by the {\tt randn}
+function--you are encouraged to familiarize yourself with the
+function.  For example, plotting {\tt plot(3*randn([1 100]))} will
+plot gaussian-distributed random numbers with a standard deviation of
+3.  We also need to add the possibilities of decay (fluorescence) and
+energy transfer to our random walk, and we need to calculate the
+diffusion constant based on the lifetime and diffusion length.
+
+In the exciton diffusion experiments, it is difficult to determine the
+diffusion constant directly, so usually what is determined and
+reported in the literature is an exciton {\em diffusion length},
+$L_D$, typically in the range of about 4 nm to 15 nm for conjugated
+polymers.  Exciton diffusion lengths as high as hundreds of nm are
+reported for highly crystalline anthracene at low temperature.  Be
+careful when looking in the literature--there are lots of improbably
+large exciton diffusion lengths reported, likely due to systematic
+error, sloppy experiments, overinterpreted experiments, etc.  For
+example, Gregg et al. concluded that thin films of a perylene
+derivative (PPEI) yielded large (2.5 $\mu$m!) exciton diffusion
+lengths, on the basis of experiments in which a film was excited from
+one side and the emission of an acceptor layer on the other side of
+the film was measured (B. Gregg 1997 JPC-B).  However, disorder
+(pinholes, etc) in the PPEI film, intermixing of the layers, and
+perhaps some waveguiding were likely responsible for the observed
+acceptor emission--other experiments with uniformly dye-doped films
+and using NSOM were unable to reproduce the large exciton diffusion
+lengths previously reported (J. McNeill, 2000 JCP).  Be suspicious if
+anybody reports anything above 15 nm for a conjugated polymer or
+disordered material (such as 2010-2011 Barbara papers, older papers by
+Gregg, Buratto, etc).  The relationship between diffusion length
+$L_D$, the diffusion constant $D$, and donor lifetime $\tau_d$ is
+defined by,
+%
+$$
+L_D = \sqrt{2 D \tau_d},
+$$
+%
+which can be easily rearranged to give $D$ from the
+experimentally-determined $L_D$ and $\tau_d$.
+
+Typically the parameters we plug into a simulation are the diffusion
+length $L_D$, the F\" orster radius $R_0$, the particle size, the
+pure donor fluorescence lifetime $\tau_d$, particle size $R_{np}$
+and the time step $\Delta t$, typically set to be at least a factor of
+20-50 smaller than the lifetime of the donor.  The basic physical
+picture then is that we have an exciton that is generated at some
+random position within a nanoparticle.  The exciton hops from site to
+site within the sphere of the nanoparticle over many time steps, and
+at each time step it can undergo decay or energy transfer.  The
+exciton continues on its trajectory until decay or energy transfer
+occurs.
+
+Now let's get down to the problem of calculating trajectories.  At
+each time step, there is some probability that the exciton will decay
+by either fluorescing or undergoing energy transfer. We need an
+expression for calculating the probability of fluorescence decay per
+time step.  The probability of a given exciton decaying per time step
+is given by,
+%
+$$
+p=1-e^{-\Delta t/\tau_d} \simeq \frac{\Delta t}{\tau_d}.
+$$
+%
+So, at each time step (each iteration in a loop), we generate a random
+number between 0 and 1, and compare it to the above probability to
+determine if the exciton decays.
+
+Now we need an expression for the probability of FRET occurring during
+a given timestep.  We know that the rate of energy transfer $k_{ET}$
+is given by the expression,
+%
+$$
+k_{ET} = \frac{1}{\tau_D} \left( \frac{R_0}{R} \right)^6
+$$
+Thus the probability of energy transfer at a given time step is given by,
+%
+$$
+p_{ET} = \frac{\Delta t}{\tau_D} \left( \frac{R_0}{R} \right)^6
+$$
+%
+Since there will typically be multiple acceptors in a nanoparticle, in
+our simulation we will need to sum up the rates of energy transfer of
+a given exciton to each acceptor to give a total energy transfer rate.
+
+\vskip 24 pt
+
+\noindent {\Large \bf The structure of the {\tt etdiffnp} simulation
+  code} \vskip 10 pt
+
+In order to properly simulate this exciton hopping process using a
+Monte Carlo approach, we need to run lots and lots of randomly
+generated trajectories and collect information about what occurred and
+when for each exciton trajectory.  In addition, we will average over
+many possible random arrangements of dye molecules, since the
+arrangement of dye molecules will vary from particle to particle and
+that will affect the results.  There are 3 {\sc matlab} scripts that
+do the work: {\tt etdiffnp.m}, {\tt etdiffnp\_hlp.m}, and {\tt
+  etdiffnp\_fun.m}.
+
+{\tt etdiffnp.m} is the script that sets up the system physical
+parameters and simulation parameters, runs the other scripts that do
+the actual simulations, and saves and plots the simulation results.
+This is the script that you will have to edit.
+
+{\tt etdiffnp\_hlp} is the script that does some additional setup (mostly
+generating the random dye positions) and calls {\tt etdiffnp\_fun},
+which calculates the exciton trajectories by a 3D random walk.
+
+To run the simulations, edit {\tt etdiffnp.m} and change parameters to
+match the parameters for the system you want to simulate.  You'll
+probably want to put the simulation scripts in a directory like {\tt
+  c:$\backslash$diffmodel}.  Then start {\sc MATLAB}, type {\tt cd
+  c:$\backslash$diffmodel} and then run {\tt etdiffnp}.  After about
+5-10 minutes, the simulation should end, and the donor fluorescence
+lifetime simulation results will be plotted.  The time variable is
+{\tt tt}, the fluorescence intensity is in {\tt fdecay}, and the
+energy transfer efficiency is in {\tt EffVec}.  Several useful numbers
+are also printed to the command window, including the quenching
+efficiency, its uncertainty, and the mean exciton lifetime.  I will
+try to add a fit to find the $\beta$ parameter, as well.
+
+\vskip 24 pt
+
+\noindent {\Large \bf Notes on simulations of non-exponential
+  dynamics} \vskip 10 pt
+
+These are miscellaneous notes regarding the simulations.  We will
+discuss these after you've digested this document and taken a look at
+the code and run a couple of simple simulations.
+
+\begin{enumerate}
+
+\item We need to increase the number of excitons, {\tt nex} in order to get reliable
+lifetime information.  Keep increasing {\tt nex} and/or {\tt navg}
+until {\tt length(decaylist)} is above 20000.  Maybe closer to 100,000
+will be required to get the noise level down to a level where we can
+get acceptable fits to find the stretch parameter.  We can also edit
+the {\tt histran} variable to make the bin sizes larger for the
+histograms, but this also worsens the time resolution.
+
+\item Will want to get good lifetime simulations for energy transfer
+efficiencies ranging from about 20\% to about 80\%.
+
+\item If 1 quencher per particle gives a quenching efficiency that is
+  higher than you need (say, you want 20\% but it gives 40\%), then
+  increase the particle size, or decrease the Forster radius or
+  diffusion length, depending on what makes more sense.  If you are
+  not sure, then just increase the particle size.
+
+\item Once we get the decays, we will want to fit them to a
+  ``stretched exponential'' (actually Wikipedia has a nice intro on
+  this function) in order to try to determine the ``stretch''
+  parameter $\beta$, and how the average lifetime and the stretch
+  parameter are related to the average energy transfer efficiency.
+
+\item I'm not sure if the code has the right particle size, diffusion
+  length, particle radius that correspond to the PFBT nanoparticles
+  you have been making.  Hopefully you can obtain the correct numbers
+  from JJ's dissertation or Jiangbo's paper (run them by me as well).
+
+\item The amount of time it takes to do a simulation is very sensitive
+  to {\tt dt}.  It might be best to start with a relatively large {\tt
+    dt} like 10 or 20 ps, and a small {\tt nex=1500}, try a bunch of
+  different {\tt ndye} values until you get efficiency that is about
+  right, then once you have found the right {\tt nyde}, reduce {\tt
+    dt} to 5, 2 or even 1 ps, to improve accuracy and time resolution
+  at a cost of increased simulation time), and also crank up {\tt nex}
+  and {\tt navg} to make the decays less noisy.  In other words, a
+  larger time step and fewer excitons or averages gets you fairly
+  accurate efficiency results fast, so you can figure out how many
+  quenchers you want to use. After that, for more accurate dynamics,
+  you need to increase the number of excitons and averages, and reduce
+  the time step.
+
+\item Be careful not to confuse radius with diameter.  It's an easy
+  mistake to make.
+
+\item You might want to first do some semilog plots and check for
+deviations from exponential behavior.
+
+\item I have some fitting code called {\tt theofit}.  To use it on
+  some simulation results, change to the appropriate directory and run
+  {\tt theofitrun}.  The parameters are $\tau_{kww}$ and $\beta$,
+  respectively.  $\tau_{kww}$ is usually a number between 20 and 300
+  (picoseconds), and the stretch parameter $\beta$ should be a number
+  between 0.3 and 1.
+
+\item Further down the to-do list is to try to estimate what the
+  acceptor dynamics should look like.  There should be an exponential
+  or stretched exponential rise.  We should work through the
+  appropriate rate equations for the simple case and also simulate
+  what the data would look like, to see if we have a chance of
+  possibly getting out some useful information from TCSPC measurements
+  of the rise of the acceptor emission.
+
+\end{enumerate}
+
+\vskip 24 pt
+
+\noindent {\Large \bf Append A - Energy Transfer Efficiency as a
+  Function of Distance } \vskip 10 pt
+
+For checking the code, I verified that, in the absence of
+diffusion, energy transfer to a single quencher gives the proper
+curve for energy transfer efficiency (probability) as a function of
+distance $R$.  The proper functional form is,
+%
+$$
+p(R) = \frac{1}{1 + \left( \frac{R}{R_0} \right)^6}
+$$
+
+\vskip 24 pt
+
+\noindent {\Large \bf Appendix B - Diffusion and Decay With a Point
+  Source/Sink } \vskip 10 pt
+
+For checking the code, I verified that it reproduces the correct
+behavior for a pointlike sink (a quencher with $R_0$ set to 0.1 nm,
+$L_D$ = 3 nm). The functional form for diffusion and decay from a
+point source is identical to (or a mirror image of) the functional
+form for diffusion and decay for a point sink.  This problem was
+perhaps first solved by Fermi in his calculations of neutron diffusion
+leading up to the demonstration of the first nuclear fission chain
+reaction, and comes up in a number of real world problems, such as
+spreading of a radioactive plume, spreading of toxic compounds in an
+aquifer, etc.  At steady-state, diffusion-decay from a point source in
+3D yields a density of,
+%
+$$
+n(R) = \frac{n_0 K_0(R/L_D)}{R}
+$$
+%
+where $K_0$ is the zeroth-order modified Bessel function and $n_0$ is
+the density at the point source.  In {\sc matlab}, this is given by
+{\tt besselk(0,R/LD)}.  In 2D, the solution is,
+%
+$$
+n(R) = \frac{n_0 K_0(R/L_D)}{\sqrt{R}},
+$$
+%
+and in 1D, the solution is,
+%
+$$
+n(x) = n_0 K_0(x/L_D).
+$$
+%
+
+For diffusion-related information, I suggest a web search and literature search
+on the key words ``diffusion length'', the Powell papers, and the book
+The Mathematics of Diffusion, by J. Crank.
+
+\end{document}

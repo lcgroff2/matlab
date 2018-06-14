@@ -1,0 +1,77 @@
+
+% poidec3.m
+
+% calculate exponential decay for ensemble of particles with
+% poisson-distributed quenchers. This version uses tau_kww and beta
+% from the exciton diffusion model, and also differentiates between
+% defect-quenchers and dyes.
+
+
+tau=3000; % lifetime without quenchers, in ps
+avedye=2.992; % average number of dyes per np
+avedef=5; % average number of defect-quenchers per np
+dt=1; % 1 ps
+
+ndyevec=[0 1 2 3 4 5 6 7 8 9 10]; % array of number of quenchers, must be sequential integers starting at zero
+tauvec=[3000 2737 2078 1723 1438 1158 978 873 778 644 593]; % tau_kww from exciton diffusion simulation
+betavec=[1 0.3293 0.3221 0.3057 0.3193 0.3114 0.3098 0.3153 0.3152 0.3061 0.3055]; % beta values from exciton diffusion simulation
+qevec=[0 0.4252 0.6388 0.7325 0.7983 0.8487 0.8806 0.9015 0.9172 0.9330 0.9415]; % quenching efficiency--should go up to 0.97 or higher
+
+% first calculate quenching efficiency based on poisson distribution,
+% using nested for-loops.
+qave=0;
+sumprob=0;
+
+tpoi=0:dt:(tau*4);
+poidecay=zeros(size(tpoi));
+
+for ndye=ndyevec;
+    for ndef=ndyevec;
+        % note: the probability of having a given bumber of dyes and a given number of defects is given by the product of the poisson distribution functions 
+        prob=poisspdf(ndye,avedye)*poisspdf(ndef,avedef);
+        ntot=ndye+ndef;
+        if ntot>max(ndyevec),
+            ntot=length(ndyevec)-1; % truncate if ntot too big (stop at qe=0.97 or so)
+        end
+        sumprob=sumprob+prob; % keep track of overall probability, as a cross-check
+        qave=qave+prob*qevec(ntot+1); % quenching efficiency depends on the total number of quenchers
+        tau_n=tauvec(ntot+1);
+        beta_n=betavec(ntot+1);
+        % calculate weighted average decay
+        poidecay=poidecay+prob*exp(-(tpoi/tau_n).^beta_n);
+    end
+end
+
+fprintf(1,'for avedye = %.4g, avedef = %.4g, poisson-weighted average quenching efficiency qave = %.4g\n',avedye,avedef,qave);
+
+if sumprob<0.9
+  disp('You need a longer ndyevec, tauvec, betavec, qevec')
+  return
+end
+
+% fit to kww model
+fit.fnstr='A*exp(-(t/tau).^beta)'; % enter the desired function here
+fit.fnxstr='t';
+fit.xstr='xdat';
+fit.ystr='ydat';
+lbound=[0.5 100 0.3];
+ubound=[1.5 4000 1.2];
+% lower bound for fit parameters,
+% listed in order of appearance in above formula, starting on the left 
+fit.lbound=lbound; 
+fit.ubound=ubound;
+
+% do some copying/rearranging of variables from the simulation:
+xdat=tpoi(1:2000);
+ydat=poidecay(1:2000);
+
+rnlfit
+kwwparms=outparm;
+
+fprintf(1,'plotting fit to kww\n');
+plot(tpoi,poidecay,xdat,yfit)
+axis([0 3000 0 1])
+
+
+
+

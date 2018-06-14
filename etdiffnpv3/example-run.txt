@@ -1,0 +1,82 @@
+
+Some more notes on running simulations:
+
+-if one dye per particle quenches say 50%, and you want to simulate a range of quenching from 10% to 90%, then consider increasing the particle size as a temporary expedient to get some results to compare to data.  Ultimately, you would want to use the proper poisson distribution to calculate the quenching, and a weighted average of the TCSPC simulation to simulate lifetime, but according to my experience this expedient will work as a temporary shortcut.
+
+-for initial determination of quenching efficiency as a function of dye concentration, use a somewhat smaller navg and number of excitons, to speed things up.
+
+Typical workflow
+
+1.  Edit "etdiffnp.m" to set physical parameters:
+
+% nprad = nanoparticle radius, nm:
+parm.nprad = 12; 
+% etrad = Forster energy transfer radius, nm:
+parm.etrad =2.5;
+% ld = exciton diffusion length, nm:
+parm.ld = 5;
+% tau0 = lifetime, in absence of quencher, picoseconds:
+parm.tau0 = 3000;
+% ndye = number of dyes/quenchers (per particle):
+parm.ndye = 10;
+
+Also set the simulation parameters:
+
+% nex = number of excitons:
+parm.nex = 3000; % 500 is probably the minimum number to use.  3000
+                 % typical.
+% dt = time step, in picoseconds.  Never use larger than tau0/20.
+% accuracy is compromised for dt>tau0/100.
+parm.dt = 4;
+% navg = number of averages - at least 20 needed (guess)
+parm.navg = 40;
+
+% histogram binning range for plotting fluorescence lifetime simulation.
+histran=10:20:9000; 
+
+
+
+2.  Copy/paste the above into lab notebook file
+
+3.  Run the simulation once
+
+>> etdiffnp
+
+4. Copy/paste results into lab notebook file:
+
+Quenching efficiency (1.0=max): 0.2681
+Uncertainty in quenching eff:  0.00293
+RMS displacement per time step:  0.18257 nm
+Mean exciton lifetime  3066.7 ps
+estimated beta (approx)  0.8787
+
+5.  You might need to adjust parameters, using the following rules as a guide:
+-if you have just 1 dye and too much quenching, make the particle bigger (see above note).
+-if the RMS displacement per timestep is > 0.1*ld or > 0.1*etrad, then decrease
+ the timestep.
+-if the mean lifetime is short (quenching efficiency high), consider decreasing the timestep "dt", otherwise there won't be enough useful data points in the simulation for fitting the fluorescence decay.  You probably want 100>tau/dt
+-if the lifetime is too short you might need to change the "histran" to decrease the histogram bin spacing, so that more data points are available to fit.  As always with histograms, there is a tradeoff between noise and number of points.
+-if the fluorescence decay curve is too noisy, you need to either adjust histran or increase the number of excitons or increase "navg".
+
+6.  Fit to stretched-exponential, bi-exponential, and stretched exponential, and record fit parameters:
+
+>> fitetdiff
+
+single exp: A*exp(-t/tau)
+A =   771.23
+tau =   2258.5
+RMS resid: 13.85
+
+bi-exp: A*(f*exp(-t/tau1)+(1-f)*exp(-t/tau2))
+A =   803.46
+f = 0.088463
+tau1 =   452.14
+tau2 =   2356.1
+weighted average lifetime   2187.6
+RMS residual 12.9
+
+kww: A*exp(-(t/tau).^beta)
+A =   798.74
+tau =   2144.9
+beta =  0.93494
+RMS resid: 13.0

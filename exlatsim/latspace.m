@@ -1,0 +1,31 @@
+% Determination of a physical delta x using chromophore weight. LCG
+O = 16; C = 12; H = 1; N = 14; S = 32; %Atomic molar weights
+avo = 6.022e23; % Avogadro's Number, molecules/mol
+molwt = 10000; % PFBT polymer molecular weight, g/mol
+
+nprad = 5e-7; % Unswollen nanoparticle radius, cm
+npvol = (2*nprad)^3; % Nanoparticle volume, cm^3
+rho = 1; % Polymer density, g/cm^3
+npwt = npvol*rho; % Nanoparticle weight, g
+npmol = npwt/molwt; % moles of PFBT per nanoparticle
+npmolec = round(npmol*avo); % Number of polymer chains per nanoparticle
+
+molrepunit = 2*N+(35)*C+(8+17+17)*H+S; % Molar weight of one repeat unit (by counting atoms &
+                                           % multiplying by atomic molar weights), g/mol
+molchrom = molrepunit*2; % Assume 2 repeat units per chromophore, g/mol
+polychrom = round(molwt/molchrom); % mole ratio, chromophores/polymer chain
+npchrom = polychrom*npmolec; % Chromophores per nanoparticle
+chromvol = npvol/npchrom; % Chromophore volume, cm^3/chromophore
+dx = chromvol^(1/3); % Lattice Spacing, cm
+dx = dx*1e7; % Lattice Spacing, nm
+fprintf('Chromophore molar weight, %3.0f g/mol\n',molchrom)
+fprintf('Chromophore Volume: %1.2e cm^3\nLattice Spacing: %1.2f nm\n\n',chromvol,dx)
+
+
+% Not accounting for molecules per np:
+chromg = molchrom/avo; %molar weight of 1 chromophore (g/mol) divided by avogadro's number
+                       %(g/mol)*(mol/molecule) = g/molecule.
+chromv = chromg/rho;   %g/molecule / g/cm^3 = cm^3/molecule.
+dx_alt = chromv^(1/3);     %lattice spacing, cm
+dx_alt = dx_alt*1e7;        %lattice spacing, nm
+fprintf('Alternate method, Chromophore Volume: %1.2e cm^3\nLattice Spacing: %1.2f nm\n',chromv,dx_alt)

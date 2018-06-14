@@ -1,0 +1,8 @@
+fit(xout2(:), n2(:), 'gauss1','lower',[0,5,0])
+fit(xout3(:), n3(:), 'gauss1','lower',[0,5,0])
+mean(histph(:,7))
+std(histph(:,7))
+mean(histph(:,4))
+std(histph(:,4))
+mean(histph(:,3))
+mean(histph(:,2))

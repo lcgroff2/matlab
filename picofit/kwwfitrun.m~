@@ -1,0 +1,196 @@
+
+% fitrun--automated picosecond fit routine.  JDM 4/2008
+
+% Note: see text at bottom of script for calculating weighted
+% time constants.
+
+% User must edit the following lines.
+
+global IRFx IRFy ;
+
+DataFile='041408-2.asc';
+IRFFile='041408-3.asc';
+
+dt=6.7;                 % dwell time in ps (picoseconds per bin)
+clear fitinfo
+fitinfo.t0lbound=-10;
+fitinfo.t0ubound=10;
+fitinfo.t0curval=0;
+fitinfo.fun{1}.function = 'exp';
+fitinfo.fun{1}.lbound=[40];
+fitinfo.fun{1}.ubound=[200];
+fitinfo.fun{1}.curval=[100];
+fitinfo.fun{2}.function = 'offset'; % offset has no nonlinear
+                                    % parameters
+fitinfo.fun{3}.function = 'irf'; % IRF has no parameters
+
+
+global MAXTIME
+MAXTIME=30;   %Length of time for Monte Carlo fit.
+SaveFile = [DataFile '.fit.mat']; % where to save fit results.
+dran=1655:2200;
+DoBoxcar=0;
+DoErrorbar=0;
+
+% end of user-configurable section
+
+% load datafiles
+DataY=loadpico(DataFile);
+DataX=(1:length(DataY))*dt;
+
+IRFy=loadpico(IRFFile);
+IRFx=DataX;
+
+
+plot(DataX(dran),DataY(dran)./max(DataY(dran)),IRFx(dran),IRFy(dran)./max(IRFy(dran)))
+
+
+disp('If plot looks good, press return, else hit ctrl-c and change dran');
+pause
+
+DataX=DataX(dran);
+DataY=DataY(dran);
+IRFx=IRFx(dran);
+IRFy=IRFy(dran);
+
+%offset X axis to max of IRF
+[maxval,maxidx]=max(IRFy);
+DataX=DataX-DataX(maxidx);
+IRFx=DataX;
+
+if DoBoxcar==1,
+  [IRFx,IRFy]=myboxcar(IRFx,IRFy,2);
+  [DataX,DataY]=myboxcar(DataX,DataY,2);
+end
+
+fprintf(1,'using random number fitting for %4.2f min.\n',MAXTIME/60);
+
+
+[pp,yfit,amp]=kwwfit(DataX,DataY,fitfun) ;
+
+***stopped here** pp needs to be changed
+
+disp('initial Monte Carlo fit results')
+ppmc=pp
+
+yfitsum=yfit*amp;
+yfitsum=yfitsum(:);
+chisq=sum((DataY(:)-yfitsum).^2)/length(DataY)
+
+mcchisq=chisq;
+
+disp('refining fit result using 25 percent boundaries')
+
+guesstaus=pp(2:length(pp));
+guessT0=pp(1);
+
+[pp,yfit,amp]=kwwfit(DataX,DataY,[(-5+guessT0) (5+guessT0)],fixtaus,0.75*guesstaus,1.25*guesstaus) ;
+ppsim=pp
+
+yfitsum=yfit*amp;
+yfitsum=yfitsum(:);
+chisq=sum((DataY(:)-yfitsum).^2)/length(DataY)
+
+
+disp('refining fit result using 5 percent boundaries')
+
+guesstaus=pp(2:length(pp));
+guessT0=pp(1);
+
+[pp,yfit,amp]=kwwfit(DataX,DataY,[(-5+guessT0) (5+guessT0)],fixtaus,0.95*guesstaus,1.05*guesstaus) ;
+ppsim=pp
+
+yfitsum=yfit*amp;
+yfitsum=yfitsum(:);
+chisq=sum((DataY(:)-yfitsum).^2)/length(DataY)
+
+
+disp('refining fit result using 2 percent boundaries')
+
+guesstaus=pp(2:length(pp));
+guessT0=pp(1);
+
+[pp,yfit,amp]=kwwfit(DataX,DataY,[(-2+guessT0) (2+guessT0)],fixtaus,0.98*guesstaus,1.02*guesstaus) ;
+ppsim=pp
+
+disp('refining fit result using 1 percent boundaries')
+
+guesstaus=pp(2:length(pp));
+guessT0=pp(1);
+
+[pp,yfit,amp]=kwwfit(DataX,DataY,[(-1+guessT0) (1+guessT0)],fixtaus,0.99*guesstaus,1.01*guesstaus) ;
+ppsim=pp
+
+
+
+disp(['T0 is ' num2str(pp(1))])
+disp('time constants are')
+pp(2:length(pp))
+
+bestfittaus=pp(2:length(pp));
+bestfitT0=pp(1);
+bestyfit=yfit;
+bestamp=amp;
+bestfitcurves=zeros(size(yfit));
+theodata=yfit*amp;
+for cnt=1:length(amp),
+  bestfitcurves(:,cnt)=yfit(:,cnt)*amp(cnt);
+end
+
+
+
+if DoErrorbar==1,
+
+  disp('now doing error bar estimation')
+
+  numfakes=20;
+
+  paramstore=zeros([length(pp) numfakes]);
+
+  for cnt1=1:numfakes,
+
+    FakeY=shotnoise(theodata);
+
+    % generate fake data with poisson noise
+    % note: this is a bad noise generator, **need to fix**
+  
+    rndinittaus=0.9*bestfittaus+rand(size(bestfittaus)).*bestfittaus*.2;
+
+    [pp,yfit,amp]=kwwfit(DataX,FakeY,[(bestfitT0-2) (bestfitT0+2)],fixtaus,0.6*rndinittaus,1.4*rndinittaus);
+
+    pp
+    paramstore(:,cnt1)=pp(:);
+
+  end
+  disp('error bars for T0, Tau1, Tau2...  are');
+  std(paramstore')
+
+end
+
+save(SaveFile)
+
+disp('final T0 is ')
+bestfitT0
+disp('final time constants are ')
+bestfittaus
+
+
+figure(1)
+plot(DataX,DataY,'o',DataX,theodata,DataX,DataY(:)-theodata(:))
+figure(2)
+plot(DataX,bestfitcurves)
+title('Individual fit curves')
+figure(1)
+
+disp('Integrated amplitudes of individual fit curves:')
+
+disp('The last 2 amplitudes are for flat offset and linear offset')
+
+disp('A negative amplitude typically indicates an exponential rise')
+
+intamps=sum(bestfitcurves)
+
+% for the case of 4 time constants, assuming the first one not of interest
+% you would calculate the photon-weighted average time constant as:
+
+% sum(intamps(2:4)/sum(intamps(2:4)).*bestfittaus(2:4))
