@@ -1,10 +1,14 @@
-PhD MATLAB code for projects associated with the 2015 Dissertation titled:
+# PhD MATLAB code for projects associated with the 2015 Dissertation titled:
 
 [Picosecond Time-Resolved Studies of Multiple Energy Transfer in Conjugated Polymer Nanoparticles](https://core.ac.uk/download/268651601.pdf)
+
+## Related Journal Articles:
 
 [Journal of Physical Chemistry C, 2017, "Effect of Swelling on Multiple Energy Transfer in Conjugated Polymer Nanoparticles"](https://pubs.acs.org/doi/10.1021/acs.jpcc.7b00892)
 
 [Journal of Physical Chemistry C, 2013, "Measurement of Exciton Transport in Conjugated Polymer Nanoparticles"](https://pubs.acs.org/doi/10.1021/jp407065h)
+
+## MATLAB scripts:
 
 [Exciton Diffusion Model Notes](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/diffmodel-notes.pdf)
 
