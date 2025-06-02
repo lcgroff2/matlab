@@ -8,7 +8,7 @@ PhD MATLAB code for projects associated with the 2015 Dissertation titled:
 
 ![Exciton Diffusion Model Notes](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/diffmodel-notes.pdf)
 
-Exciton Diffusion Model MATLAB scripts required to run Monte Carlo Poisson Statistical Model
+Exciton Diffusion Model MATLAB scripts required to run Monte Carlo Bootstrap Poisson Statistical Model
 
 [etmulti.m](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/etmulti.m), [etdiffnp3.m](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/etdiffnp3.m), [etdiffnp_fun3.m](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/etdiffnp_fun3.m)
 
