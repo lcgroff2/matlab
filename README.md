@@ -96,6 +96,8 @@ fitinfo.fun{curfun}.curval=[350];
 %                                      %parameter, second is beta
 ```
 
-The fit routine works by truncating the data to within the data region (dran) of interest, then randomly selecting from the input parameter ranges (tau, or tau_1/tau_2, or tau_kww/beta), convolving with the measured IRF loaded in from the IRF ASCII file, and comparing the RMSE of the convolution of the IRF with the simulated decay using the choice of fit parameters to the experimental lifetime decay trace loaded in by the DataFile. Stochastic gradient descent is used from this point forward to minimize the RMSE using Monte Carlo random sampling of input parameters in three 60-second intervals until the fit either converges to the best fit parameters for the model, or exits with the current parameters after 3 minutes of runtime. 
+The fit routine works by truncating the data to within the data region (dran) of interest, then randomly selecting from the input parameter ranges (tau, or tau_1/tau_2, or tau_kww/beta), convolving with the measured IRF loaded in from the IRF ASCII file, and comparing the RMSE of the convolution of the IRF with the simulated decay using the choice of fit parameters to the experimental lifetime decay trace loaded in by the DataFile. 
+
+Stochastic gradient descent is used from this point forward to shrink the range of input parameters with each 60-second run such that the maximum values are those that minimized the RMSE over as many Monte Carlo random samples of input parameters can be done in 60 seconds (dependent on local machine). After three 60-second intervals of Monte Carlo gradient descent fitting, the fit either converges to the best fit parameters for the model, or exits with the current parameters.
 
 [Least Squares Fitting code](https://github.com/lcgroff2/matlab/tree/master/picofit)
