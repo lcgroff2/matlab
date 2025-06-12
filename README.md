@@ -97,7 +97,11 @@ fitinfo.fun{curfun}.curval=[350];
 ```
 
 The fit routine works by truncating the data to within the data region (dran) of interest, then randomly selecting from the input parameter ranges (tau, or tau_1/tau_2, or tau_kww/beta), convolving with the measured IRF loaded in from the IRF ASCII file, and comparing the RMSE of the discrete convolution of the IRF with the simulated decay using the choice of fit parameters to the experimental lifetime decay trace loaded in by the DataFile. 
+
+## Example of Discrete Convolution
 ![](https://github.com/lcgroff2/Research-Backup/blob/master/Clemson/Dissertation/Figures/Discrete%20Convolution.jpg)
+(a) is the instrument response function (IRF), (b) is a simulated exponential decay function to mimic fluorescence intensity decay, (c) is the FFT-based discrete convolution of (a) and (b). 
+
 Downhill Simplex is used for optimization of the fit function from this point forward to shrink the range of input parameters with each 60-second run such that the maximum values are those that minimized the RMSE over as many Monte Carlo random samples of input parameters can be done in 60 seconds (dependent on local machine). After three 60-second intervals of Monte Carlo least-squares fitting, the fit either converges to the best fit parameters for the model, or exits with the current parameters.
 
 [Least Squares Fitting code](https://github.com/lcgroff2/matlab/tree/master/picofit)
