@@ -8,7 +8,7 @@
 
 [Journal of Physical Chemistry C, 2013, "Measurement of Exciton Transport in Conjugated Polymer Nanoparticles"](https://pubs.acs.org/doi/10.1021/jp407065h)
 
-## MATLAB scripts:
+## MATLAB scripts (Original Exciton Diffusion code written by [Jason D. McNeill](https://scholar.google.com/citations?hl=en&user=HWAiw5EAAAAJ), with updates and swelling model code by Louis Groff):
 
 [Exciton Diffusion Model Notes](https://github.com/lcgroff2/matlab/blob/master/etdiffnpv3/diffmodel-notes.pdf)
 
